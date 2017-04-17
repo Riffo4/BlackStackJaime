@@ -1,0 +1,83 @@
+﻿
+.blackJackGame{
+    display: inline-block;
+    width: 100%;     
+}
+
+.cardOverView{ 
+    display: inline-block;  
+}
+
+#dealerCards{
+    position: relative;
+    margin: 0 auto;
+}
+
+#playerCards{
+    position: relative;
+    margin: 0 auto;
+}
+
+.board{
+    width: 100%;
+    display: inline-block;
+    
+   background-image: url("/Content/Images/casino_green.jpg");
+   background-size: 100% 100%;   
+}
+
+.card{
+    height: 100%;
+}
+
+.Top{ 
+   border-bottom-style: solid;
+}
+.Footer{
+    display: inline-block;
+    width: 100%;
+    border-top-style: solid;
+}
+
+.nowrap{
+    white-space: nowrap;
+    background-color: lightsteelblue;
+    display:inline-block;
+    width:100%;
+}
+
+.spanMargin{
+    margin-left: 10px;
+    font-size: large;
+}
+
+.point{
+    border-style: solid;
+}
+
+#playerCardValue{
+    margin-left:50%;
+}
+
+#dealerCardValue{
+    margin-left:50%;
+}
+
+@media (max-width: 767px){
+   #dealerCards{       
+    display: inline-block;
+   }
+
+   #playerCards{
+    display: inline-block;
+    }
+
+    .nowrap {
+        white-space: normal;
+    }
+
+    .container{        
+        display: inline-block;
+    }
+}
+}

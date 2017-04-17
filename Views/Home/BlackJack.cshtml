@@ -1,0 +1,227 @@
+﻿@model BlackJack.Models.Game
+@using Newtonsoft.Json;
+
+@{
+    var result = Model.Result;
+    var dealerbust = false;
+    var dealerWin = false;
+    var playerWin = false;
+    var playerBust = false;
+    var tie = false;
+    var roundover = false;
+    var surrender = false;
+
+    var lost = Model.Lost;
+
+    int? win = 0;
+
+    var DealerResult = "";
+    var PlayerResult = "";
+
+    if (result != null)
+    {
+        dealerbust = result.DealerBust;
+        dealerWin = result.DealerWin;
+        playerWin = result.PlayerWin;
+        playerBust = result.PlayerBust;
+        tie = result.Tie;
+        roundover = result.RoundOver;
+        surrender = result.Surrender;
+
+        win = result.Win;
+
+        if (roundover == true)
+        {
+            if (tie)
+            {
+                DealerResult = "Tie";
+                PlayerResult = "Tie";
+            }
+
+            if (dealerbust)
+            {
+                DealerResult = "Dealer Bust! Dealers points: " + @Model.Dealer.Points;
+                PlayerResult = "Your points: " + @Model.Player.Points;
+            }
+            else if (dealerWin)
+            {
+                DealerResult = "Dealer Wins! Dealers points: " + @Model.Dealer.Points;
+                PlayerResult = "Your points: " + @Model.Player.Points;
+            }
+
+            if (playerBust)
+            {
+                PlayerResult = "Busted! Your points: " + @Model.Player.Points;
+                DealerResult = "Dealers points: " + @Model.Dealer.Points;
+            }
+            else if (playerWin)
+            {
+                PlayerResult = "You Win! Your points: " + @Model.Player.Points;
+                DealerResult = "Dealers points: " + @Model.Dealer.Points;
+            }
+
+            if (surrender)
+            {
+                PlayerResult = "You surrendered! Your points: " + @Model.Player.Points;
+                DealerResult = "Dealer Wins! Dealers points: " + @Model.Dealer.Points;
+            }
+        }
+    }
+    else
+    {
+        if (Model.startOfGame)
+        {
+            DealerResult = "Dealers points: ";
+            PlayerResult = "Your points: ";
+        }
+        else
+        {
+            DealerResult = "Dealers points: " + @Model.Dealer.Points;
+            PlayerResult = "Your points: " + @Model.Player.Points;
+        }
+    }
+}
+
+<div class="board">
+    <div class="col-xs-20">
+        <div class="Top">
+            <div style="margin-left: 50%">
+                <h2>Dealer</h2>
+            </div>
+        </div>
+        <div id="dealerCards" class="cardOverView col-xs-20"> 
+            @{
+                if (Model.Dealer.Hand.Count() != 6)
+                {
+                    <div class="col-xs-1"></div>
+                }
+                foreach (var item in Model.Dealer.Hand)
+                {
+                    <div class="col-xs-2 card ">
+                        @if (Model.startOfGame == false)
+                        {
+                            if (item.Show)
+                            {
+                                <img class="card" src="@Url.Content(item.Picture)" />
+                            }
+                            else
+                            {
+                                <img class="card" src="@Url.Content("/Content/Cards/red_joker.png")" />
+                            }
+                        }
+                        else
+                        {
+                            <img class="card" src="@Url.Content("/Content/Cards/red_joker.png")" />
+                        }
+                    </div>
+                }
+            }
+        </div>
+        <div id="dealerCardValue">
+      
+        <h4>@DealerResult</h4>
+        
+        </div>      
+
+        <div id="playerCards" class="cardOverView col-xs-20">
+            @{
+                if (Model.Player.Hand.Count() != 6)
+                {
+                    <div class="col-xs-1"></div>
+                }
+                foreach (var item in Model.Player.Hand)
+                {
+                    <div class="col-xs-2 card ">
+                        @if (Model.startOfGame == false)
+                         {
+                            <img class="card" src="@Url.Content(item.Picture)" />
+                        }
+                        else
+                        {
+                            <img class="card" src="@Url.Content("/Content/Cards/red_joker.png")" />
+                        }
+                    </div>
+                }
+            }
+        </div>
+        <div id="playerCardValue"> 
+           
+        <h4>@PlayerResult</h4>
+            
+        </div>
+
+        <div class="col-xs-20 Footer">
+            <div>
+                @if (Model.Player.Name != "")
+                {
+                    <h2 style="margin-left: 10px">
+                        @Model.Player.Name
+                    </h2>                   
+                }
+
+                <div id="playControl" class="col-xs-20" style="visibility: hidden">
+                    <button class="btn btn-default col-xs-20 col-md-3" onclick="hit()" title="Hit">Hit</button>
+                    <button class="btn btn-default col-xs-20 col-md-3" onclick="stand()" title="Stand">Stand</button>
+                    @if (false)
+                    {
+                        <button class="btn btn-default col-md-3 col-xs-20" onclick="double()" title="Double">Double</button>
+                    }
+                    @if (Model.Dealer.Hand.Count() < 3 && Model.Player.Hand.Count() == 2)
+                    {
+                        <button class="btn btn-default col-xs-20 col-md-3" onclick="ffat20()" title="Surrender">Surrender</button>
+                    }
+                </div>
+                <div class="col-xs-20 nowrap">
+                    <span class="col-xs-20 spanMargin">Bankroll: @Model.Player.Money</span>
+                    <span id="playerBet" class="col-xs-20 spanMargin">Bet: @Model.Bet</span>
+
+                    <img class="betingControlImg col-xs-20" onclick="add5()" style="margin-left: 20px" src="/Content/Images/whiteChip.jpg" />
+                    <img class="betingControlImg col-xs-20" onclick="add10()" src="/Content/Images/redChip.jpg" />
+                    <img class="betingControlImg col-xs-20" onclick="add25()" src="/Content/Images/blueChip.jpg" />
+                    <img class="betingControlImg col-xs-20" onclick="add50()" src="/Content/Images/greenChip.jpg" />
+                    <img class="betingControlImg col-xs-20" onclick="add100()" src="/Content/Images/blackChip.jpg" />
+                    @if (!lost)
+                    {
+                        <button id="dealbutton" class="betingControl btn btn-default" onclick="StartGame()" title="Deal">Deal</button>
+                    }
+                    else
+                    {
+                        if (surrender)
+                        {
+                            <button id="dealbutton" class="betingControl btn btn-default" onclick="StartGame()" title="Deal">Redeal</button>
+                        }
+                        else
+                        {
+                            <button id="dealbutton" class="betingControl btn btn-default" onclick="newGame()" title="Deal">New Game</button>
+                        }
+                    }
+                    <button class="betingControl btn btn-default" onclick="clearBet()" title="Clear">Clear</button>
+
+                    <span class="col-xs-20 spanMargin" style="float: right; margin-right: 20px; margin-top: 10px;">Win:
+                    @{ 
+                        if (result != null)
+                        {
+                            if (playerWin)
+                            {
+                                @win;
+                            }
+                            else
+                            {
+                                @win;
+                            }
+                        }
+                    }
+                    </span>
+                </div>
+            </div>
+            
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var currentGame = {
+        game: @Html.Raw(JsonConvert.SerializeObject(Model)),
+    }
+    
+</script> 
