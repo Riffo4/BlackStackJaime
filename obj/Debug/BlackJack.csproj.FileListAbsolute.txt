@@ -115,3 +115,4 @@ C:\Users\Legenden\Documents\Visual Studio 2015\Projects\BlackJack\BlackJack\bin\
 C:\Users\Legenden\Documents\Visual Studio 2015\Projects\BlackJack\BlackJack\bin\Microsoft.Owin.Security.MicrosoftAccount.xml
 C:\Users\Legenden\Documents\Visual Studio 2015\Projects\BlackJack\BlackJack\obj\Debug\BlackJack.dll
 C:\Users\Legenden\Documents\Visual Studio 2015\Projects\BlackJack\BlackJack\obj\Debug\BlackJack.pdb
+C:\Users\Legenden\Documents\Visual Studio 2015\Projects\BlackJack\BlackJack\obj\Debug\BlackJack.csprojResolveAssemblyReference.cache
