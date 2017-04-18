@@ -281,7 +281,6 @@
     <Content Include="Content\Images\blackChip.jpg" />
     <Content Include="Content\Images\blueChip.jpg" />
     <Content Include="Content\Images\casino_green.jpg" />
-    <Content Include="Content\Images\casino_green_dice.jpg" />
     <Content Include="Content\Images\greenChip.jpg" />
     <Content Include="Content\Images\redChip.jpg" />
     <Content Include="Content\Images\whiteChip.jpg" />
