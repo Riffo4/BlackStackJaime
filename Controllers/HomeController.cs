@@ -11,17 +11,45 @@ namespace BlackJack.Controllers
     public class HomeController : Controller
     {
         private Manage manage = new Manage();
+        private CacheManage cacheManage = new CacheManage();
+        private CardManage cardManage = new CardManage();
         static Random rnd = new Random();
+
         public ActionResult Index()
         {
             return View();
         }
 
+        // Game start
+        #region GameStart
+        public PartialViewResult BlackJack(string name)
+        {
+            var currentGame = CreateGameCache(name);
+
+            RoundOver(currentGame, true, false);
+
+            cacheManage.CacheGame(currentGame);
+
+            return PartialView(currentGame);
+        }
+
+        public PartialViewResult StartGame(int bet)
+        {
+            var currentGame = cacheManage.CachedGame();
+
+            currentGame.startOfGame = false;
+            currentGame.Bet = bet;
+
+            cacheManage.CacheGame(currentGame);
+
+            return PartialView("BlackJack", currentGame);
+        }
+
         public PartialViewResult NewRound()
         {
-            var currentGame = manage.CachedGame();
+            var currentGame = cacheManage.CachedGame();
 
-            var fourCards = manage.GetStartingCards(rnd, currentGame.Deck.deck);
+            var fourCards = cardManage.GetStartingCards(rnd, currentGame.Deck.deck);
             currentGame.Player.Hand = new List<PlayingCards>();
             currentGame.Dealer.Hand = new List<PlayingCards>();
 
@@ -38,22 +66,103 @@ namespace BlackJack.Controllers
 
             return PartialView("Blackjack", currentGame);
         }
+        #endregion
+        //
 
-        public PartialViewResult BlackJack(string name)
-        {            
-            var currentGame = CreateGameCache(name);
+        // Game mechanics
+        #region GameMechanics
+        public PartialViewResult Hit()
+        {
+            var currentGame = cacheManage.CachedGame();
 
-            RoundOver(currentGame, true, false);
+            manage.AddCard(rnd, currentGame, "player");
 
-            manage.CacheGame(currentGame);
+            var roundOver = RoundOver(currentGame, false, false);
 
-            return PartialView(currentGame);
+            GameOver(currentGame);
+
+            cacheManage.CacheGame(currentGame);
+
+            return PartialView("BlackJack", currentGame);
         }
 
+        public PartialViewResult Stand()
+        {
+            var currentGame = cacheManage.CachedGame();
+
+            var roundOver = RoundOver(currentGame, false, true);
+
+            GameOver(currentGame);
+
+            cacheManage.CacheGame(currentGame);
+
+            return PartialView("BlackJack", currentGame);
+        }
+
+        public PartialViewResult Surrender()
+        {
+            var currentGame = cacheManage.CachedGame();
+
+            currentGame.Result = new GameResult();
+            currentGame.Result.DealerWin = true;
+
+            int moneyBack = 0;
+            if (currentGame.Dealer.Hand[1].Show == true)
+            {
+                moneyBack = currentGame.Bet / 3;
+            }
+
+            moneyBack = currentGame.Bet / 2;
+            currentGame.Bet = 0;
+            currentGame.Player.Money += moneyBack;
+
+            cacheManage.CacheGame(currentGame);
+            return PartialView("BlackJack", currentGame);
+        }
+        #endregion
+        //
+
+        // Betting     
+        #region Betting
+        [HttpPost]
+        public ActionResult AddBet(int amount)
+        {
+            var currentGame = cacheManage.CachedGame();
+
+            if (currentGame != null)
+            {
+                if (currentGame.Player.Money >= amount)
+                {
+                    currentGame.Bet += amount;
+                    currentGame.Player.Money -= amount;
+                }
+            }
+
+            cacheManage.CacheGame(currentGame);
+            return PartialView("BlackJack", currentGame);
+        }
+
+        [HttpPost]
+        public ActionResult ClearBet()
+        {
+            var currentGame = cacheManage.CachedGame();
+            if (currentGame != null)
+            {
+                int betback = currentGame.Bet;
+                currentGame.Bet = 0;
+                currentGame.Player.Money += betback;
+            }
+
+            cacheManage.CacheGame(currentGame);
+            return PartialView("BlackJack", currentGame);
+        }
+        #endregion
+        // 
+
+        #region Private
         private void GameOver(Game currentGame)
         {
             manage.MoneyLeft(currentGame);
-
         }
 
         private bool RoundOver(Game currentGame, bool firstRound, bool dealer)
@@ -108,103 +217,11 @@ namespace BlackJack.Controllers
         private Game CreateGameCache(string name)
         {               
             var currentGame = new Game(name, rnd, true);
-            manage.CacheGame(currentGame);
+            cacheManage.CacheGame(currentGame);
 
             return currentGame;
         }
-        
-        public PartialViewResult StartGame(int bet)
-        {
-            var currentGame = manage.CachedGame();            
 
-            currentGame.startOfGame = false;
-            currentGame.Bet = bet;
-
-            manage.CacheGame(currentGame);
-
-            return PartialView("BlackJack", currentGame);
-        }
-
-        public PartialViewResult Stand()
-        {
-            var currentGame = manage.CachedGame();
-
-            var roundOver = RoundOver(currentGame, false, true);
-
-            GameOver(currentGame);
-
-            manage.CacheGame(currentGame);
-
-            return PartialView("BlackJack", currentGame);
-        }
-
-        public PartialViewResult Surrender()
-        {
-            var currentGame = manage.CachedGame();
-
-            currentGame.Result = new GameResult();
-            currentGame.Result.DealerWin = true;
-
-            int moneyBack = 0;
-            if (currentGame.Dealer.Hand[1].Show == true)
-            {
-                moneyBack = currentGame.Bet / 3;
-            }
-            
-            moneyBack = currentGame.Bet / 2;
-            currentGame.Bet = 0;
-            currentGame.Player.Money += moneyBack;
-
-            manage.CacheGame(currentGame);
-            return PartialView("BlackJack", currentGame);
-        }
-
-        public PartialViewResult Hit()
-        {
-            var currentGame = manage.CachedGame();
-            
-            manage.AddCard(rnd, currentGame, "player");
-
-            var roundOver = RoundOver(currentGame, false, false);
-
-            GameOver(currentGame);
-
-            manage.CacheGame(currentGame);
-
-            return PartialView("BlackJack", currentGame);
-        }        
-
-        [HttpPost]
-        public ActionResult AddBet(int amount)
-        {
-            var currentGame = manage.CachedGame();
-
-            if (currentGame != null)
-            {                
-                if (currentGame.Player.Money >= amount)
-                {
-                    currentGame.Bet += amount;
-                    currentGame.Player.Money -= amount;
-                }
-            }
-
-            manage.CacheGame(currentGame);
-            return PartialView("BlackJack", currentGame);
-        }
-
-        [HttpPost]
-        public ActionResult ClearBet()
-        {
-            var currentGame = manage.CachedGame();
-            if (currentGame != null)
-            {
-                int betback = currentGame.Bet;
-                currentGame.Bet = 0;
-                currentGame.Player.Money += betback;
-            }
-
-            manage.CacheGame(currentGame);
-            return PartialView("BlackJack", currentGame);
-        }
+        #endregion
     }
 }

@@ -25,8 +25,6 @@ function SetupGame() {
 }
 
 function updateView() {
-    $('#playControl').css('visibility', 'visible');
-
     $('.betingControl').prop('disabled', true);
     $('.betingControlImg').addClass('hidden');
 }
@@ -48,17 +46,16 @@ function hit() {
         method: 'POST',
         data: JSON.stringify(data),
         success: function (game) {
-
             $(".blackJackGame").html(game);
             console.log("Hit success");
 
             $('#playControl').css('visibility', 'visible');
 
+            updateView();
+
             if (currentGame.game.Result) {
                 $('#playControl').css('visibility', 'hidden');
                 $('#dealbutton').html('Redeal');
-                $('.betingControlImg').addClass('hidden');
-                $('.betingControl').prop('disabled', true);
 
                 $('#dealbutton').prop('disabled', false);
 
@@ -94,7 +91,6 @@ function stand() {
                     $('#dealbutton').html('New game');
                 }
             }
-            //$('#playControl').removeClass('hidden');
         }
     });
 }
@@ -122,6 +118,8 @@ function StartGame() {
                 $(".blackJackGame").html(game);
                 console.log("Success game started");
 
+                $('#playControl').css('visibility', 'visible');
+
                 updateView();
             }
         });
@@ -133,7 +131,6 @@ function StartGame() {
             datatype: 'json',
             method: 'POST',
             success: function (game) {
-
                 $(".blackJackGame").html(game);
                 console.log("Hit success");
             }
